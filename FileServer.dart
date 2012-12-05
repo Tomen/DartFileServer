@@ -43,9 +43,11 @@ void requestReceivedHandler(HttpRequest request, HttpResponse response) {
   List<String> files = new List<String>();
   
   DirectoryLister lister = dir.list(recursive:false); // Returns immediately.
-  lister.onError = (e) => respondFile(path, response);
-  lister.onFile = (String name) => subDirectories.add(name);
-  lister.onDir = (String name) => files.add(name);
+  lister.onError = (e){
+    respondFile(path, response);
+  };
+  lister.onDir = (String name) => subDirectories.add(name);
+  lister.onFile = (String name) => files.add(name);
   lister.onDone = (bool completed){
     if(!completed)
     {
@@ -55,13 +57,14 @@ void requestReceivedHandler(HttpRequest request, HttpResponse response) {
     String htmlResponse = '<h1>Directory Listing</h1><br/><h2>Subdirectories</h2><br/>';
     for(String subDirectory in subDirectories)
     {
-      htmlResponse.concat('<a href="${subDirectory}">${subDirectory}</a><br/>');
+      htmlResponse = htmlResponse.concat('<a href="${subDirectory}">${subDirectory}</a><br/>');
     }
-    htmlResponse.concat('<h2>Files</h2><br/>');
+    htmlResponse = htmlResponse.concat('<h2>Files</h2><br/>');
     for(String file in files)
     {
-      htmlResponse.concat('<a href="${file}">${file}</a><br/>');
+      htmlResponse = htmlResponse.concat('<a href="${file}">${file}</a><br/>');
     }
+
     List<int> encodedHtmlResponse = encodeUtf8(htmlResponse);
     response.headers.set(HttpHeaders.CONTENT_TYPE, "text/html; charset=UTF-8");
     response.contentLength = encodedHtmlResponse.length;
